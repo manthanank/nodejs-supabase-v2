@@ -15,14 +15,14 @@
   "author": "Manthan Ankolekar",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "swagger-jsdoc": "^6.2.8",
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.14"
   }
 }

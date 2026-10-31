@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Syntax check
+        run: for f in $(git ls-files '*.js'); do node --check "$f"; done
+      - name: Start server and load API docs
+        env:
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_KEY: placeholder
+          PORT: 5000
+        run: |
+          node index.js &
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5000/api-docs/ > /dev/null && exit 0
+            sleep 1
+          done
+          echo "Server did not respond" && exit 1

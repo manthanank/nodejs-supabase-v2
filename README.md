@@ -1,62 +1,50 @@
 # Node.js Supabase CRUD API
 
-A simple REST API built with Node.js and Express that connects to Supabase and performs basic CRUD operations on users.
+A REST API built with Node.js and Express that stores users in a Supabase (PostgreSQL) table, with Swagger docs.
+
+[![CI](https://github.com/manthanank/nodejs-supabase/actions/workflows/ci.yml/badge.svg)](https://github.com/manthanank/nodejs-supabase/actions/workflows/ci.yml)
 
 ## Features
 
 - Create, read, update, and delete users
-- Search for users by name
-- Get user by email
-- Error handling and proper status codes
-- Environment variable configuration
-- Swagger API documentation
+- Search users by name (case-insensitive partial match)
+- Look up a user by ID or by email
+- Interactive Swagger UI at `/api-docs`, generated from JSDoc comments in the routes
+- Errors returned as JSON with matching HTTP status codes
+- Configuration through environment variables, CORS enabled
 
 ## Tech Stack
 
-- Node.js
-- Express.js
-- Supabase (PostgreSQL database)
-- dotenv (for environment variables)
-- CORS support
-- Swagger (API documentation)
+- Node.js (ES modules) and Express
+- Supabase JavaScript client (`@supabase/supabase-js`)
+- swagger-jsdoc and swagger-ui-express
+- dotenv, cors, nodemon for development
 
-## Project Structure
+## Run locally
 
-```text
-nodejs-supabase
-├── .env                   # Environment variables
-├── .example.env           # Example environment variables template
-├── .gitignore             # Git ignore file
-├── index.js               # Main application entry point
-├── package.json           # Project dependencies and scripts
-├── README.md              # Project documentation
-├── config/
-│   ├── supabaseClient.js  # Supabase client configuration
-│   └── swagger.js         # Swagger configuration
-├── controllers/
-│   └── userController.js  # User controller functions
-├── routes/
-│   └── userRoutes.js      # API route definitions with Swagger docs
-└── services/
-    └── userService.js     # Business logic for user operations
-```
+Requirements: Node.js 22 or newer and a Supabase project.
 
-## Installation
-
-1. Clone the repository:
+1. Clone the repository and install dependencies:
 
     ```bash
     git clone https://github.com/manthanank/nodejs-supabase.git
     cd nodejs-supabase
-    ```
-
-2. Install dependencies:
-
-    ```bash
     npm install
     ```
 
-3. Create a `.env` file based on the `.example.env` template and fill in your Supabase credentials:
+2. Create a `users` table in the Supabase SQL editor:
+
+    ```sql
+    create table users (
+      id uuid primary key default gen_random_uuid(),
+      name text not null,
+      email text not null unique,
+      age integer,
+      created_at timestamptz default now()
+    );
+    ```
+
+3. Copy `.example.env` to `.env` and fill in your project values:
 
     ```text
     SUPABASE_URL=https://your-project-url.supabase.co
@@ -64,25 +52,18 @@ nodejs-supabase
     PORT=5000
     ```
 
-## Running the Application
+    If you use the anon key, add row level security policies that allow these operations, or use the service role key on a trusted server only.
 
-Start the development server:
+4. Start the server:
 
-```bash
-npm run dev
-```
+    ```bash
+    npm run dev   # restarts on file changes
+    npm start     # plain node
+    ```
 
-For production:
-
-```bash
-npm start
-```
-
-The server will run at `http://localhost:5000` by default.
+The API runs at `http://localhost:5000` and the docs at `http://localhost:5000/api-docs`.
 
 ## API Endpoints
-
-### Users
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -94,9 +75,9 @@ The server will run at `http://localhost:5000` by default.
 | PUT | `/api/users/:id` | Update user by ID |
 | DELETE | `/api/users/:id` | Delete user by ID |
 
-## Example Requests
+### Example requests
 
-### Create User
+Create a user:
 
 ```bash
 curl -X POST http://localhost:5000/api/users \
@@ -104,10 +85,29 @@ curl -X POST http://localhost:5000/api/users \
   -d '{"name": "John Doe", "email": "john@example.com", "age": 30}'
 ```
 
-### Search Users
+Search users:
 
 ```bash
-curl -X GET http://localhost:5000/api/users/search?query=John
+curl "http://localhost:5000/api/users/search?query=John"
+```
+
+## Project Structure
+
+```text
+nodejs-supabase
+├── .example.env           # Environment variable template
+├── index.js               # Express app entry point
+├── config/
+│   ├── supabaseClient.js  # Supabase client setup
+│   └── swagger.js         # Swagger configuration
+├── controllers/
+│   └── userController.js  # Request handlers
+├── routes/
+│   └── userRoutes.js      # Route definitions with Swagger docs
+├── services/
+│   └── userService.js     # Supabase queries
+└── .github/workflows/
+    └── ci.yml             # Install, syntax check, and startup check
 ```
 
 ## License
